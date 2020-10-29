@@ -1,0 +1,13 @@
+# macOS
+.DS_Store
+
+# python
+__pycache__
+
+# my files
+others/
+alan_tweet_hydration.py
+helloworld.py
+keys.py
+test.py
+tweets*
