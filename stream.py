@@ -14,20 +14,28 @@ class MyStreamListener(tweepy.StreamListener):
     def __init__(self, us_count):
         self.us_count = us_count
 
-    def on_status(self, status):
-        print(status.text)
+    def on_connect(self):
+        print('Connection to the server established!')
+
+    def handle_messages(self, message):
+        if 'limit' in message: # present for a limit notice
+            print(f'Limit message: {message}')
+        elif 'disconnect' in message: # present for a disconnect notice
+            print(f'Disconnect message: {message}')
 
     def on_data(self, raw_data):
         tweet = json.loads(raw_data)
+        self.handle_messages(tweet) # catches non-tweet messages like disconnection notices
         try:
             created_at = tweet['created_at']
+            text = tweet['text']
+            user_location = tweet['user']['location'] # profile location
+            user_description = tweet['user']['description'] # profile bio
+            lang = tweet['lang']
+            reply = tweet['in_reply_to_status_id']
         except KeyError as error:
             print(error, '\n', raw_data)
-        text = tweet['text']
-        user_location = tweet['user']['location'] # profile location
-        user_description = tweet['user']['description'] # profile bio
-        lang = tweet['lang']
-        reply = tweet['in_reply_to_status_id']
+
         matcher = '.*[nN][eE][pP][aA][lL].*' # regex matcher
 
 
@@ -85,6 +93,7 @@ class MyStreamListener(tweepy.StreamListener):
 
     def on_error(self, status_code):
         if status_code == 420:
+            print('Got error 420!')
             return False # disconnect the stream in this case
 
 
@@ -92,7 +101,7 @@ def main():
     auth = tweepy.OAuthHandler(keys.C_KEY, keys.C_SEC)
     auth.set_access_token(keys.AT, keys.AT_SEC)
 
-    api = tweepy.API(auth)
+    api = tweepy.API(auth, wait_on_rate_limit=True) # handles rate limiting
 
     myStreamListener = MyStreamListener(0)
     myStream = tweepy.Stream(auth=api.auth, listener=myStreamListener)

@@ -1,4 +1,4 @@
-#!/Users/diamond/opt/anaconda3/bin/python
+#!/usr/bin/env python
 #--------------------------------------------------------
 # code to process data
 #--------------------------------------------------------
