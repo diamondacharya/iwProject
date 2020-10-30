@@ -35,6 +35,7 @@ class MyStreamListener(tweepy.StreamListener):
             reply = tweet['in_reply_to_status_id']
         except KeyError as error:
             print(error, '\n', raw_data)
+            return True # just continue with another round in this case
 
         matcher = '.*[nN][eE][pP][aA][lL].*' # regex matcher
 
