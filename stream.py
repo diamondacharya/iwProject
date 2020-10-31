@@ -19,9 +19,9 @@ class MyStreamListener(tweepy.StreamListener):
 
     def handle_messages(self, message):
         if 'limit' in message: # present for a limit notice
-            print(f'Limit message: {message}')
+            print(f"Limit message at {time.strftime('%H:%M %p')}: {message}")
         elif 'disconnect' in message: # present for a disconnect notice
-            print(f'Disconnect message: {message}')
+            print(f"Disconnect message at {time.strftime('%H:%M %p')}: {message}")
 
     def on_data(self, raw_data):
         tweet = json.loads(raw_data)
