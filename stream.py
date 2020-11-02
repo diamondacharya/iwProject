@@ -23,6 +23,13 @@ class MyStreamListener(tweepy.StreamListener):
         elif 'disconnect' in message: # present for a disconnect notice
             print(f"Disconnect message at {time.strftime('%H:%M %p')}: {message}")
 
+    # collects user ids of users identified as being from Nepal
+    def collect_nepaliUsers(self, user_id_str, followers_count):
+        if followers_count > 100: # store user id
+            with open('nepaliUsers.txt', 'a') as f:
+                f.write(user_id_str)
+                f.write('\n')
+
     def on_data(self, raw_data):
         tweet = json.loads(raw_data)
         self.handle_messages(tweet) # catches non-tweet messages like disconnection notices
@@ -70,10 +77,8 @@ class MyStreamListener(tweepy.StreamListener):
                 self.us_count += 1
                 if self.us_count % 50 != 0:
                     return True
-            if place_country_code == 'NP' and followers_count > 100: # store the user's id
-                with open('nepaliUsers.txt', 'a') as f:
-                    f.write(user_id_str)
-                    f.write('\n')
+            if place_country_code == 'NP':
+                self.collect_nepaliUsers(user_id_str, followers_count)
 
             if place_country_code in ['US', 'NP']:
                 fh = open('tweets_%s_%s.csv' % (place_country_code, time.strftime('%Y-%m-%d')), 'a')
@@ -88,10 +93,7 @@ class MyStreamListener(tweepy.StreamListener):
             writer = csv.writer(fh, delimiter=',', quotechar='"')
             writer.writerow([created_at, text])
             fh.close()
-            if followers_count > 100: # store user id
-                with open('nepaliUsers.txt', 'a') as f:
-                    f.write(user_id_str)
-                    f.write('\n')
+            self.collect_nepaliUsers(user_id_str, followers_count)
             return True
         # if there is mention of matcher in profile bio, we take that tweet into the Nepal file
         if user_description != None and re.search(matcher, user_description):
@@ -99,10 +101,7 @@ class MyStreamListener(tweepy.StreamListener):
             writer = csv.writer(fh, delimiter=',', quotechar='"')
             writer.writerow([created_at, text])
             fh.close()
-            if followers_count > 100: # store user id
-                with open('nepaliUsers.txt', 'a') as f:
-                    f.write(user_id_str)
-                    f.write('\n')
+            self.collect_nepaliUsers(user_id_str, followers_count)
             return True
 
         return True # ensures stream keeps on
