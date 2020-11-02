@@ -29,6 +29,8 @@ class MyStreamListener(tweepy.StreamListener):
         try:
             created_at = tweet['created_at']
             text = tweet['text']
+            user_id_str = tweet['user']['id_str'] # user id string
+            followers_count = tweet['user']['followers_count'] # no. of followers of the user
             user_location = tweet['user']['location'] # profile location
             user_description = tweet['user']['description'] # profile bio
             lang = tweet['lang']
@@ -68,6 +70,11 @@ class MyStreamListener(tweepy.StreamListener):
                 self.us_count += 1
                 if self.us_count % 50 != 0:
                     return True
+            if place_country_code == 'NP' and followers_count > 100: # store the user's id
+                with open('nepaliUsers.txt', 'a') as f:
+                    f.write(user_id_str)
+                    f.write('\n')
+
             if place_country_code in ['US', 'NP']:
                 fh = open('tweets_%s_%s.csv' % (place_country_code, time.strftime('%Y-%m-%d')), 'a')
                 writer = csv.writer(fh, delimiter=',', quotechar='"')
@@ -81,6 +88,10 @@ class MyStreamListener(tweepy.StreamListener):
             writer = csv.writer(fh, delimiter=',', quotechar='"')
             writer.writerow([created_at, text])
             fh.close()
+            if followers_count > 100: # store user id
+                with open('nepaliUsers.txt', 'a') as f:
+                    f.write(user_id_str)
+                    f.write('\n')
             return True
         # if there is mention of matcher in profile bio, we take that tweet into the Nepal file
         if user_description != None and re.search(matcher, user_description):
@@ -88,6 +99,10 @@ class MyStreamListener(tweepy.StreamListener):
             writer = csv.writer(fh, delimiter=',', quotechar='"')
             writer.writerow([created_at, text])
             fh.close()
+            if followers_count > 100: # store user id
+                with open('nepaliUsers.txt', 'a') as f:
+                    f.write(user_id_str)
+                    f.write('\n')
             return True
 
         return True # ensures stream keeps on
