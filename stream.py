@@ -25,7 +25,7 @@ class MyStreamListener(tweepy.StreamListener):
 
     # collects user ids of users identified as being from Nepal
     def collect_nepaliUsers(self, user_id_str, followers_count):
-        if followers_count > 100: # store user id
+        if followers_count > 50: # store user id
             with open('nepaliUsers.txt', 'a') as f:
                 f.write(user_id_str)
                 f.write('\n')
