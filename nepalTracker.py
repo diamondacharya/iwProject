@@ -22,7 +22,7 @@ words = [
     'kathmandu', 'pokhara', 'gorkha', 'gorkhali', 'kusma', 'kushma', 'lalitpur', 'bhaktapur',
     'bharatpur', 'biratnagar', 'birgunj', 'janakpur', 'ghorahi', 'hetauda', 'dhangadi', 'tulsipur',
     'itahari', 'nepalgunj', 'butwal', 'dharan', 'kalaiya', 'bhimdatta', 'damak', 'budhanilkantha',
-    'gokarneshwar', 'birtamod', 'birendranagar', 'tilottama',
+    'gokarneshwar', 'birtamod', 'birendranagar', 'tilottama', 'baglung', 'beni'
     # celebrities / musicians, bands / artists
     'prabal gurung', 'shristi shrestha', 'priyanka karki', 'narayan gopal', 'indira joshi',
     'namrata shrestha', 'nabin k bhattarai', 'nepathya', '1974 AD', 'rajesh hamal', 'aruna lama',
@@ -51,4 +51,12 @@ words = [
     'dandi biyo', 'kabbadi', 'kabaddi', 'ludo', 'baghchal', 'bagchal', 'rangashala', 'rangasala',
     # traditional clothing
     'daura suruwal', 'dhaka topi', 'kurta surwal', 'dhoti', 'bakkhu', 'docha'
+]
+
+# places / cities to look for in user's profile location
+cities = [
+    'kathmandu', 'pokhara', 'lalitpur', 'bhaktapur', 'bharatpur', 'biratnagar', 'birgunj',
+    'janakpur', 'ghorahi', 'hetauda', 'dhangadhi', 'tulsipur', 'itahari', 'nepalgunj', 'butwal',
+    'dharan', 'kalaiya', 'kusma', 'budhanilkantha', 'tokha', 'chadragiri', 'kapilvastu', 'lumbini',
+    'baglung', 'banepa', 'changunarayan', 'dhankuta', 'beni', 'patan',
 ]

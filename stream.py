@@ -87,14 +87,16 @@ class MyStreamListener(tweepy.StreamListener):
                 fh.close()
                 return True
 
-        # if there is mention of matcher in profile location, we take that tweet into the Nepal file
-        if user_location != None and re.search(matcher, user_location):
-            fh = open('tweets_%s_%s.csv' % ('NP', time.strftime('%Y-%m-%d')), 'a')
-            writer = csv.writer(fh, delimiter=',', quotechar='"')
-            writer.writerow([created_at, text])
-            fh.close()
-            self.collect_nepaliUsers(user_id_str, followers_count)
-            return True
+        # if there is mention of matcher in profile location, or if the profile location is in the
+        # list of Nepali cities, we take that tweet into the Nepal file
+        if user_location != None:
+            if re.search(matcher, user_location) or user_location.lower() in nepalTracker.cities:
+                fh = open('tweets_%s_%s.csv' % ('NP', time.strftime('%Y-%m-%d')), 'a')
+                writer = csv.writer(fh, delimiter=',', quotechar='"')
+                writer.writerow([created_at, text])
+                fh.close()
+                self.collect_nepaliUsers(user_id_str, followers_count)
+                return True
         # if there is mention of matcher in profile bio, we take that tweet into the Nepal file
         if user_description != None and re.search(matcher, user_description):
             fh = open('tweets_%s_%s.csv' % ('NP', time.strftime('%Y-%m-%d')), 'a')
