@@ -11,14 +11,16 @@ import re
 import csv
 
 class MyStreamListener(tweepy.StreamListener):
-    def __init__(self, us_count):
-        self.us_count = us_count
+    def __init__(self):
+        self.us_count = 0
+        self.rate_limit_tracker = 0
 
     def on_connect(self):
         print('Connection to the server established!')
 
     def handle_messages(self, message):
         if 'limit' in message: # present for a limit notice
+            self.rate_limit_tracker += 1
             print(f"Limit message at {time.strftime('%H:%M %p')}: {message}")
         elif 'disconnect' in message: # present for a disconnect notice
             print(f"Disconnect message at {time.strftime('%H:%M %p')}: {message}")
@@ -33,6 +35,8 @@ class MyStreamListener(tweepy.StreamListener):
     def on_data(self, raw_data):
         tweet = json.loads(raw_data)
         self.handle_messages(tweet) # catches non-tweet messages like disconnection notices
+        if self.rate_limit_tracker > 3: # disconnect if more than 3 rate limit msg is received
+            return False
         try:
             created_at = tweet['created_at']
             text = tweet['text']
@@ -120,7 +124,7 @@ def main():
 
     api = tweepy.API(auth, wait_on_rate_limit=True) # handles rate limiting
 
-    myStreamListener = MyStreamListener(0)
+    myStreamListener = MyStreamListener()
     myStream = tweepy.Stream(auth=api.auth, listener=myStreamListener)
 
     # location in the order southwest and northeast, longitude and latitude
