@@ -18,10 +18,25 @@ class MyStreamListener(tweepy.StreamListener):
     def on_connect(self):
         print('Connection to the server established!')
 
+    # wait for the specified times if rate limit notice if received
+    def backoff(self):
+        min = 60
+        if self.rate_limit_tracker == 1:
+            time.sleep(min)
+        elif self.rate_limit_tracker == 2:
+            time.sleep(2 * min)
+        elif self.rate_limit_tracker == 3:
+            time.sleep(4 * min)
+        elif self.rate_limit_tracker == 4:
+            time.sleep(8 * min)
+            self.rate_limit_tracker = 0 # reset it
+
+    # handles if there is a limit or disconnect notice
     def handle_messages(self, message):
         if 'limit' in message: # present for a limit notice
             self.rate_limit_tracker += 1
             print(f"Limit message at {time.strftime('%H:%M %p')}: {message}")
+            self.backoff()
         elif 'disconnect' in message: # present for a disconnect notice
             print(f"Disconnect message at {time.strftime('%H:%M %p')}: {message}")
 
@@ -35,8 +50,6 @@ class MyStreamListener(tweepy.StreamListener):
     def on_data(self, raw_data):
         tweet = json.loads(raw_data)
         self.handle_messages(tweet) # catches non-tweet messages like disconnection notices
-        if self.rate_limit_tracker > 3: # disconnect if more than 3 rate limit msg is received
-            return False
         try:
             created_at = tweet['created_at']
             text = tweet['text']
