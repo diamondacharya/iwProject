@@ -13,30 +13,14 @@ import csv
 class MyStreamListener(tweepy.StreamListener):
     def __init__(self):
         self.us_count = 0
-        self.rate_limit_tracker = 0
 
     def on_connect(self):
         print('Connection to the server established!')
 
-    # wait for the specified times if rate limit notice if received
-    def backoff(self):
-        min = 60
-        if self.rate_limit_tracker == 1:
-            time.sleep(min)
-        elif self.rate_limit_tracker == 2:
-            time.sleep(2 * min)
-        elif self.rate_limit_tracker == 3:
-            time.sleep(4 * min)
-        elif self.rate_limit_tracker == 4:
-            time.sleep(8 * min)
-            self.rate_limit_tracker = 0 # reset it
-
-    # handles if there is a limit or disconnect notice
+    # prints if there is a limit or disconnect notice
     def handle_messages(self, message):
         if 'limit' in message: # present for a limit notice
-            self.rate_limit_tracker += 1
             print(f"Limit message at {time.strftime('%H:%M %p')}: {message}")
-            self.backoff()
         elif 'disconnect' in message: # present for a disconnect notice
             print(f"Disconnect message at {time.strftime('%H:%M %p')}: {message}")
 
@@ -59,8 +43,8 @@ class MyStreamListener(tweepy.StreamListener):
             user_description = tweet['user']['description'] # profile bio
             lang = tweet['lang']
             reply = tweet['in_reply_to_status_id']
-        except KeyError as error:
-            print(error, '\n', raw_data)
+        except KeyError:
+            print('--keyError--')
             return True # just continue with another round in this case
 
         matcher = '.*[nN][eE][pP][aA][lL].*' # regex matcher
@@ -135,7 +119,7 @@ def main():
     auth = tweepy.OAuthHandler(keys.C_KEY, keys.C_SEC)
     auth.set_access_token(keys.AT, keys.AT_SEC)
 
-    api = tweepy.API(auth, wait_on_rate_limit=True) # handles rate limiting
+    api = tweepy.API(auth, wait_on_rate_limit=True)
 
     myStreamListener = MyStreamListener()
     myStream = tweepy.Stream(auth=api.auth, listener=myStreamListener)
