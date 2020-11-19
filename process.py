@@ -3,6 +3,7 @@
 # code to process data
 #--------------------------------------------------------
 import json
+import os
 import csv
 import nltk
 from nltk.corpus import stopwords
@@ -11,6 +12,9 @@ import pandas as pd
 from collections import Counter
 from tweetLists import nepaliTweets
 from tweetLists import usTweets
+from slangs import slangs
+import plotly.express as px
+import matplotlib.pyplot as plt
 
 
 # compiling the stopwords
@@ -21,6 +25,12 @@ punctuation = ['!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', '-', '.', 
 function_words = ['i', 'we', 'us', 'a', 'an', 'the']
 others = ['http', 'https', "'s", '``', "n't", 'amp', '...']
 stopwords = eng_stopwords + punctuation + function_words + others
+
+# extracting constants counts
+with open('tweetCount_nepal.json', 'r') as f:
+    tweetCount_nepal = json.load(f)
+with open('tweetCount_us.json', 'r') as f:
+    tweetCount_us = json.load(f)
 
 # helper for give_frequentWords
 # removes all the stop words from the tokenized list 'l' and returns the filtered list
@@ -53,32 +63,53 @@ def give_frequentWords(n, tweetFiles):
         calculate_wordFreq(filtered, n)
         print(80 * '-')
 
-# takes in a list 'l' of tweet files and prints the no. of tweets in each one of those files
-def print_tweetNo(l):
+# takes in a list 'l' of tweet files and the country name and prints the no. of tweets in a new file
+def print_tweetCount(l, countryName):
+    counts = []
     for i in range(len(l)):
         fh = open(l[i], 'r')
         fileObj = csv.reader(fh, delimiter=',', quotechar='"')
         tweetCount = sum(1 for row in fileObj)
-        print(l[i], ' -- ', tweetCount)
+        counts.append(tweetCount)
+    countsJson = json.dumps(counts)
+    with open(f'tweetCount_{countryName}.json', 'w') as writeFile:
+        writeFile.write(countsJson)
 
-# test function
-def test():
-    with open(nepaliTweets[0], 'r') as f:
-        line_strings = f.read().splitlines()
-        count = 0
-        for line in line_strings:
-            time = line.split(',')[0]
-            text = line.split(',')[1]
-            print(time)
-            print(text)
-            if count == 5:
-                break
-            count += 1
+# takes in a list 'l' of tweet files, and the country name. Then, prints to a json file a
+# dictionary containing the decade name as the key and the slang counts for each day
+def print_slangCount(l, countryName):
+    countDict = {} # dict with decade names as keys and a list of slang count for all days as values
+    decades = slangs.keys()
+    # for each decade
+    for decade in decades:
+        countList = [] # list to track slang counts for each day (for slangs from this decade)
+        # for each day of tweets
+        for tweetFile in l:
+            with open(tweetFile, 'r') as f:
+                reader = csv.DictReader(f, ['timestamp', 'text'], delimiter=',', quotechar='"')
+                count = 0
+                for row in reader:
+                    textLower = row['text'].lower()
+                    if (any(slang in textLower for slang in slangs[decade])):
+                        count+=1
+                countList.append(count)
+                f.close()
+        countDict[decade] = countList
+    jsonDict = json.dumps(countDict)
+    with open(f'slangCount_{countryName}.json', 'w') as f:
+        f.write(jsonDict)
+
+def plotSlangs_byDecade():
+    plt.plot([1, 2, 3])
+    plt.savefig('plots/test.jpeg')
+
 
 def main():
-    print_tweetNo(nepaliTweets)
-    # print_tweetNo(usTweets)
+    # print_tweetCount(usTweets, 'us')
     # give_frequentWords(10, usTweets)
+    # print_slangCount(usTweets, 'us')
+    # with open('tweetCount_nepal.json', 'r') as f:
+    #     jsonObj = json.load(f)
 
 
 
