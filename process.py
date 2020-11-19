@@ -9,17 +9,11 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 import pandas as pd
 from collections import Counter
+from tweetLists import nepaliTweets
+from tweetLists import usTweets
 
-nepaliTweets = ['tweets_NP_2020-10-26.csv', 'tweets_NP_2020-10-27.csv', 'tweets_NP_2020-10-28.csv',
-                'tweets_NP_2020-10-29.csv', 'tweets_NP_2020-10-30.csv', 'tweets_NP_2020-10-31.csv',
-                'tweets_NP_2020-11-01.csv', 'tweets_NP_2020-11-02.csv', 'tweets_NP_2020-11-03.csv',
-                'tweets_NP_2020-11-04.csv']
 
-usTweets = ['tweets_US_2020-10-26.csv', 'tweets_US_2020-10-27.csv', 'tweets_US_2020-10-28.csv',
-            'tweets_US_2020-10-29.csv', 'tweets_US_2020-10-30.csv', 'tweets_US_2020-10-31.csv',
-            'tweets_US_2020-11-01.csv', 'tweets_US_2020-11-02.csv', 'tweets_US_2020-11-03.csv',
-            'tweets_US_2020-11-04.csv']
-
+# compiling the stopwords
 eng_stopwords = list(stopwords.words('english'))
 punctuation = ['!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', '-', '.', '/', ':', ';', '<',
                 '=', '>', '?', '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~', ',', '’',
@@ -28,18 +22,13 @@ function_words = ['i', 'we', 'us', 'a', 'an', 'the']
 others = ['http', 'https', "'s", '``', "n't", 'amp', '...']
 stopwords = eng_stopwords + punctuation + function_words + others
 
-# takes in a list 'l' of tweet files and prints the no. of tweets in each one of those files
-def print_tweetNo(l):
-    for i in range(len(l)):
-        with open(l[i], 'r') as f:
-            tweets = f.read().splitlines()
-            print(l[i], ' -- ', len(tweets))
-
+# helper for give_frequentWords
 # removes all the stop words from the tokenized list 'l' and returns the filtered list
 def filter_text(l):
     ret_list = [item for item in l if not item in stopwords]
     return ret_list
 
+# helper for give_frequentWords
 # takes in a list of words 'l' and prints the n most common words with their frequencies
 def calculate_wordFreq(l, n):
     counter = Counter(l)
@@ -64,11 +53,33 @@ def give_frequentWords(n, tweetFiles):
         calculate_wordFreq(filtered, n)
         print(80 * '-')
 
+# takes in a list 'l' of tweet files and prints the no. of tweets in each one of those files
+def print_tweetNo(l):
+    for i in range(len(l)):
+        fh = open(l[i], 'r')
+        fileObj = csv.reader(fh, delimiter=',', quotechar='"')
+        tweetCount = sum(1 for row in fileObj)
+        print(l[i], ' -- ', tweetCount)
+
+# test function
+def test():
+    with open(nepaliTweets[0], 'r') as f:
+        line_strings = f.read().splitlines()
+        count = 0
+        for line in line_strings:
+            time = line.split(',')[0]
+            text = line.split(',')[1]
+            print(time)
+            print(text)
+            if count == 5:
+                break
+            count += 1
 
 def main():
-    # print_tweetNo(nepaliTweets)
+    print_tweetNo(nepaliTweets)
     # print_tweetNo(usTweets)
-    give_frequentWords(10, usTweets)
+    # give_frequentWords(10, usTweets)
+
 
 
 if __name__ == '__main__':
