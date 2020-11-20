@@ -15,6 +15,7 @@ from tweetLists import usTweets
 from slangs import slangs
 import plotly.express as px
 import matplotlib.pyplot as plt
+from statistics import mean
 
 
 # compiling the stopwords
@@ -108,13 +109,14 @@ def print_slangCount(l, countryName):
         f.write(jsonDict)
 
 # calculates and plots the proportion of tweets containing the slangs for each decade (for US vs Nepal)
+# also prints outs the average in each iteration
 def plotSlangs_byDecade():
     for decade in slangs.keys():
         percentageList_us = [round(100 * (item1 / item2), 2) for item1, item2 in zip(slangCount_us[decade], tweetCount_us)]
         percentageList_nepal = [round(100 * (item1 / item2), 2) for item1, item2 in zip(slangCount_nepal[decade], tweetCount_nepal)]
         f = plt.figure()
-        plt.xticks([0, 5, 10, 15, 20], ['Oct 26', 'Oct 31', 'Nov 5', 'Nov 10', 'Nov 15', 'Nov 20'])
-        plt.xlabel('Time')
+        plt.xticks([0, 5, 10, 15, 20], ['oct 26', 'oct 31', 'nov 5', 'nov 10', 'nov 15', 'nov 20'])
+        plt.xlabel('time')
         title = '19' + decade if decade[0] in ['6', '7', '8', '9'] else '20' + decade
         plt.title(title)
         plt.ylabel("% of tweets containing the slangs")
@@ -126,13 +128,48 @@ def plotSlangs_byDecade():
         plt.savefig(f'plots/slangs_{decade}.jpeg')
         f.clear()
         plt.close(f)
+        print(f'{decade} -- nepal mean -- {round(mean(percentageList_nepal), 2)}')
+        print(f'{decade} -- us mean -- {round(mean(percentageList_us), 2)}')
 
+# calculates, prints, and plots the proportion of tweets containing all the slangs combined
+# also prints the mean
+def plotSlangs_all():
+    dayLength = len(slangCount_nepal['60s'])
+    percentageList_us = []
+    percentageList_nepal = []
+    for i in range(dayLength):
+        sum = 0
+        for decade in slangCount_nepal.keys():
+            sum += slangCount_nepal[decade][i]
+        percent = round(100 * (sum / tweetCount_nepal[i]), 2)
+        percentageList_nepal.append(percent)
+        sum2 = 0
+        for decade in slangCount_us.keys():
+            sum2 += slangCount_us[decade][i]
+        percent2 = round(100 * (sum2 / tweetCount_us[i]), 2)
+        percentageList_us.append(percent2)
+    print(percentageList_nepal)
+    print(percentageList_us)
+    plt.xticks([0, 5, 10, 15, 20], ['Oct 26', 'Oct 31', 'Nov 5', 'Nov 10', 'Nov 15', 'Nov 20'])
+    plt.xlabel('Time')
+    title = 'All Slangs'
+    plt.title(title)
+    plt.ylabel("% of tweets containing the slangs")
+    axes = plt.gca()
+    axes.set_ylim([0, 1.2])
+    plt.plot(percentageList_us, label='us')
+    plt.plot(percentageList_nepal, label='nepal')
+    plt.legend(loc='upper right')
+    plt.savefig(f'plots/slangs_all.jpeg')
+    print(f'nepal mean -- {round(mean(percentageList_nepal), 2)}')
+    print(f'us mean -- {round(mean(percentageList_us), 2)}')
 
 def main():
     # print_tweetCount(usTweets, 'us')
     # give_frequentWords(10, usTweets)
     # print_slangCount(usTweets, 'us')
-    plotSlangs_byDecade()
+    # plotSlangs_byDecade()
+    plotSlangs_all()
     # with open('tweetCount_nepal.json', 'r') as f:
     #     jsonObj = json.load(f)
 
