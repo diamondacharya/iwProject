@@ -36,10 +36,14 @@ with open('slangCount_nepal.json', 'r') as f:
     slangCount_nepal = json.load(f)
 with open('slangCount_us.json', 'r') as f:
     slangCount_us = json.load(f)
+with open('commonWordCount_nepal.json', 'r') as f:
+    commonWordCount_nepal = json.load(f)
+with open('commonWordCount_us.json', 'r') as f:
+    commonWordCount_us = json.load(f)
 
-# creating day-label list for plot purposes
-dayLabel = ['26', '27', '28', '29', '30', '31', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
-            '11', '12', '13', '14', '15', '16', '17', '18']
+# most common content words from the American data
+common_words = ['trump', 'biden', 'election', 'vote', 'president']
+# things that didn't go in there -- [people, time, love, day, new, job]
 
 # helper for give_frequentWords
 # removes all the stop words from the tokenized list 'l' and returns the filtered list
@@ -58,7 +62,7 @@ def calculate_wordFreq(l, n):
 
 # does all the data processing in the list of tweet files 'tweetFiles' and gives the 'n' most
 # frequent words in each file
-def give_frequentWords(n, tweetFiles):
+def give_frequentWords_fileWise(n, tweetFiles):
     for tweetFile in tweetFiles:
         print(tweetFile, '\n')
         with open(tweetFile, 'r') as f:
@@ -71,6 +75,23 @@ def give_frequentWords(n, tweetFiles):
             filtered = filter_text(lowered)
         calculate_wordFreq(filtered, n)
         print(80 * '-')
+
+# gives the n most frequent words from all the us tweet files
+def give_frequentWords_all(n):
+    l = [] # list to store all the tweets from all us files
+    for tweetFile in usTweets:
+        with open(tweetFile, 'r') as f:
+            reader = csv.DictReader(f, ['timestamp', 'text'], delimiter=',', quotechar='"')
+            tokenized = [] # stores tweets for each day's file
+            for row in reader:
+                textLower = row['text'].lower()
+                tokens = word_tokenize(textLower)
+                tokenized = tokenized + tokens
+            filtered = filter_text(tokenized)
+            f.close()
+        l = l + filtered
+    calculate_wordFreq(l, n)
+
 
 # takes in a list 'l' of tweet files and the country name and prints the no. of tweets in a new file
 def print_tweetCount(l, countryName):
@@ -108,6 +129,30 @@ def print_slangCount(l, countryName):
     with open(f'slangCount_{countryName}.json', 'w') as f:
         f.write(jsonDict)
 
+# takes in a list 'l' of tweet files, and the country name. Then, prints to a json file a
+# dictionary containing the common word name as key and the corresponding tweet count for each day
+def print_commonWordCount(l, countryName):
+    countDict = {} # dictionary to store word names as keys and a list of count as values
+    # for each word in common_words
+    for word in common_words:
+        countList = []
+        # for each day of tweets
+        for tweetFile in l:
+            with open(tweetFile, 'r') as f:
+                reader = csv.DictReader(f, ['timestamp', 'text'], delimiter=',', quotechar='"')
+                count = 0
+                for row in reader:
+                    textLower = row['text'].lower()
+                    if (word in textLower):
+                        count+= 1
+                countList.append(count)
+                f.close()
+        countDict[word] = countList
+    jsonDict = json.dumps(countDict)
+    with open(f'commonWordCount_{countryName}.json', 'w') as f:
+        f.write(jsonDict)
+
+
 # calculates and plots the proportion of tweets containing the slangs for each decade (for US vs Nepal)
 # also prints outs the average in each iteration
 def plotSlangs_byDecade():
@@ -130,6 +175,62 @@ def plotSlangs_byDecade():
         plt.close(f)
         print(f'{decade} -- nepal mean -- {round(mean(percentageList_nepal), 2)}')
         print(f'{decade} -- us mean -- {round(mean(percentageList_us), 2)}')
+
+# calculates and plots the proportion of tweets containing the given common word (from common_words)
+#  (for US vs Nepal). Does this for all the common words. Also prints outs the average in each iteration
+def plotCommonWords():
+    for word in common_words:
+        percentageList_us = [round(100 * (item1 / item2), 2) for item1, item2 in zip(commonWordCount_us[word], tweetCount_us)]
+        percentageList_nepal = [round(100 * (item1 / item2), 2) for item1, item2 in zip(commonWordCount_nepal[word], tweetCount_nepal)]
+        f = plt.figure()
+        plt.xticks([0, 5, 10, 15, 20], ['oct 26', 'oct 31', 'nov 5', 'nov 10', 'nov 15', 'nov 20'])
+        plt.xlabel('time')
+        title = word
+        plt.title(title)
+        plt.ylabel(f"% of tweets containing '{word}'")
+        axes = plt.gca()
+        axes.set_ylim([0, 16])
+        plt.plot(percentageList_us, label='us', color='red')
+        plt.plot(percentageList_nepal, label='nepal', color='green')
+        plt.legend(loc='upper right')
+        plt.savefig(f'plots/commonWords_{word}.jpeg')
+        f.clear()
+        plt.close(f)
+        print(f'{word} -- nepal mean -- {round(mean(percentageList_nepal), 2)}')
+        print(f'{word} -- us mean -- {round(mean(percentageList_us), 2)}')
+
+# calculates, prints, and plots the proportion of tweets containing all the common words combined
+# also prints the mean
+def plotCommonWords_all():
+    dayLength = len(commonWordCount_nepal['trump'])
+    percentageList_us = []
+    percentageList_nepal = []
+    for i in range(dayLength):
+        sum = 0
+        for word in common_words:
+            sum += commonWordCount_nepal[word][i]
+        percent = round(100 * (sum / tweetCount_nepal[i]), 2)
+        percentageList_nepal.append(percent)
+        sum2 = 0
+        for word in common_words:
+            sum2 += commonWordCount_us[word][i]
+        percent2 = round(100 * (sum2 / tweetCount_us[i]), 2)
+        percentageList_us.append(percent2)
+    print(percentageList_nepal)
+    print(percentageList_us)
+    plt.xticks([0, 5, 10, 15, 20], ['Oct 26', 'Oct 31', 'Nov 5', 'Nov 10', 'Nov 15', 'Nov 20'])
+    plt.xlabel('Time')
+    title = 'All Election words'
+    plt.title(title)
+    plt.ylabel("% of tweets containing all election words")
+    axes = plt.gca()
+    axes.set_ylim([0, 50])
+    plt.plot(percentageList_us, label='us', color='red')
+    plt.plot(percentageList_nepal, label='nepal', color='green')
+    plt.legend(loc='upper right')
+    plt.savefig(f'plots/commonWords_all.jpeg')
+    print(f'nepal mean -- {round(mean(percentageList_nepal), 2)}')
+    print(f'us mean -- {round(mean(percentageList_us), 2)}')
 
 # calculates, prints, and plots the proportion of tweets containing all the slangs combined
 # also prints the mean
@@ -164,14 +265,22 @@ def plotSlangs_all():
     print(f'nepal mean -- {round(mean(percentageList_nepal), 2)}')
     print(f'us mean -- {round(mean(percentageList_us), 2)}')
 
+# main method
 def main():
     # print_tweetCount(usTweets, 'us')
-    # give_frequentWords(10, usTweets)
+    # give_frequentWords_all(100)
     # print_slangCount(usTweets, 'us')
+    # print_commonWordCount(usTweets, 'us')
     # plotSlangs_byDecade()
     plotSlangs_all()
     # with open('tweetCount_nepal.json', 'r') as f:
     #     jsonObj = json.load(f)
+    # print(mean(tweetCount_nepal))
+    # print(mean(tweetCount_us))
+    # print(commonWordCount_nepal)
+    # print(commonWordCount_us)
+    # plotCommonWords()
+    # plotCommonWords_all()
 
 
 
