@@ -31,6 +31,14 @@ with open('tweetCount_nepal.json', 'r') as f:
     tweetCount_nepal = json.load(f)
 with open('tweetCount_us.json', 'r') as f:
     tweetCount_us = json.load(f)
+with open('slangCount_nepal.json', 'r') as f:
+    slangCount_nepal = json.load(f)
+with open('slangCount_us.json', 'r') as f:
+    slangCount_us = json.load(f)
+
+# creating day-label list for plot purposes
+dayLabel = ['26', '27', '28', '29', '30', '31', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
+            '11', '12', '13', '14', '15', '16', '17', '18']
 
 # helper for give_frequentWords
 # removes all the stop words from the tokenized list 'l' and returns the filtered list
@@ -99,15 +107,32 @@ def print_slangCount(l, countryName):
     with open(f'slangCount_{countryName}.json', 'w') as f:
         f.write(jsonDict)
 
+# calculates and plots the proportion of tweets containing the slangs for each decade (for US vs Nepal)
 def plotSlangs_byDecade():
-    plt.plot([1, 2, 3])
-    plt.savefig('plots/test.jpeg')
+    for decade in slangs.keys():
+        percentageList_us = [round(100 * (item1 / item2), 2) for item1, item2 in zip(slangCount_us[decade], tweetCount_us)]
+        percentageList_nepal = [round(100 * (item1 / item2), 2) for item1, item2 in zip(slangCount_nepal[decade], tweetCount_nepal)]
+        f = plt.figure()
+        plt.xticks([0, 5, 10, 15, 20], ['Oct 26', 'Oct 31', 'Nov 5', 'Nov 10', 'Nov 15', 'Nov 20'])
+        plt.xlabel('Time')
+        title = '19' + decade if decade[0] in ['6', '7', '8', '9'] else '20' + decade
+        plt.title(title)
+        plt.ylabel("% of tweets containing the slangs")
+        axes = plt.gca()
+        axes.set_ylim([0, 1])
+        plt.plot(percentageList_us, label='us')
+        plt.plot(percentageList_nepal, label='nepal')
+        plt.legend(loc='upper right')
+        plt.savefig(f'plots/slangs_{decade}.jpeg')
+        f.clear()
+        plt.close(f)
 
 
 def main():
     # print_tweetCount(usTweets, 'us')
     # give_frequentWords(10, usTweets)
     # print_slangCount(usTweets, 'us')
+    plotSlangs_byDecade()
     # with open('tweetCount_nepal.json', 'r') as f:
     #     jsonObj = json.load(f)
 
