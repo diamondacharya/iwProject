@@ -93,7 +93,7 @@ def give_frequentWords_all(n):
     calculate_wordFreq(l, n)
 
 
-# takes in a list 'l' of tweet files and the country name and prints the no. of tweets in a new file
+# takes in a list 'l' of tweet files and the country code and prints the no. of tweets in a new file
 def print_tweetCount(l, countryName):
     counts = []
     for i in range(len(l)):
@@ -267,16 +267,14 @@ def plotSlangs_all():
 
 # main method
 def main():
-    # print_tweetCount(usTweets, 'us')
-    # give_frequentWords_all(100)
+    # print_tweetCount(nepaliTweets, 'nepal')
+    give_frequentWords_all(100)
     # print_slangCount(usTweets, 'us')
     # print_commonWordCount(usTweets, 'us')
     # plotSlangs_byDecade()
-    plotSlangs_all()
-    # with open('tweetCount_nepal.json', 'r') as f:
-    #     jsonObj = json.load(f)
-    # print(mean(tweetCount_nepal))
+    # plotSlangs_all()
     # print(mean(tweetCount_us))
+    # print(mean(tweetCount_US))
     # print(commonWordCount_nepal)
     # print(commonWordCount_us)
     # plotCommonWords()
