@@ -183,7 +183,7 @@ def plotCommonWords():
         percentageList_us = [round(100 * (item1 / item2), 2) for item1, item2 in zip(commonWordCount_us[word], tweetCount_us)]
         percentageList_nepal = [round(100 * (item1 / item2), 2) for item1, item2 in zip(commonWordCount_nepal[word], tweetCount_nepal)]
         f = plt.figure()
-        plt.xticks([0, 5, 10, 15, 20], ['oct 26', 'oct 31', 'nov 5', 'nov 10', 'nov 15', 'nov 20'])
+        plt.xticks([0, 5, 10, 15, 20, 25, 30], ['oct 26', 'oct 31', 'nov 5', 'nov 10', 'nov 15', 'nov 20', 'nov 25'])
         plt.xlabel('time')
         title = word
         plt.title(title)
@@ -218,7 +218,7 @@ def plotCommonWords_all():
         percentageList_us.append(percent2)
     print(percentageList_nepal)
     print(percentageList_us)
-    plt.xticks([0, 5, 10, 15, 20], ['Oct 26', 'Oct 31', 'Nov 5', 'Nov 10', 'Nov 15', 'Nov 20'])
+    plt.xticks([0, 5, 10, 15, 20, 25, 30], ['Oct 26', 'Oct 31', 'Nov 5', 'Nov 10', 'Nov 15', 'Nov 20', 'Nov 25'])
     plt.xlabel('Time')
     title = 'All Election words'
     plt.title(title)
@@ -268,9 +268,9 @@ def plotSlangs_all():
 # main method
 def main():
     # print_tweetCount(nepaliTweets, 'nepal')
-    give_frequentWords_all(100)
+    # give_frequentWords_all(100)
     # print_slangCount(usTweets, 'us')
-    # print_commonWordCount(usTweets, 'us')
+    # print_commonWordCount(nepaliTweets, 'nepal')
     # plotSlangs_byDecade()
     # plotSlangs_all()
     # print(mean(tweetCount_us))
